@@ -4,7 +4,6 @@ import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.LoginRequest;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.RegisterRequest;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.AuthResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Usuario;
-import com.BarbiereDev.cardapio_virtual_BackEnd.repository.UsuarioRepository;
 import com.BarbiereDev.cardapio_virtual_BackEnd.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,13 +17,13 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
-        if (usuarioRepository.existsByEmail(request.getEmail())) {
+        if (usuarioService.existsByEmail(request.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email já cadastrado");
         }
 
@@ -35,7 +34,7 @@ public class AuthService {
                 .role(request.getRole())
                 .build();
 
-        usuarioRepository.save(usuario);
+        usuarioService.save(usuario);
 
         var token = jwtService.generateToken(usuario.getEmail());
 

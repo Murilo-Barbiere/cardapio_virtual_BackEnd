@@ -5,7 +5,6 @@ import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.RegisterRequest;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.AuthResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Role;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Usuario;
-import com.BarbiereDev.cardapio_virtual_BackEnd.repository.UsuarioRepository;
 import com.BarbiereDev.cardapio_virtual_BackEnd.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +28,7 @@ import static org.mockito.Mockito.*;
 class AuthServiceTest {
 
     @Mock
-    private UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -75,9 +74,9 @@ class AuthServiceTest {
     @Test
     @DisplayName("Deve registrar um novo usuário com sucesso")
     void registerSuccess() {
-        when(usuarioRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
+        when(usuarioService.existsByEmail(registerRequest.getEmail())).thenReturn(false);
         when(passwordEncoder.encode(registerRequest.getSenha())).thenReturn("senha-hashada");
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
+        when(usuarioService.save(any(Usuario.class))).thenReturn(usuario);
         when(jwtService.generateToken(usuario.getEmail())).thenReturn("token-jwt");
 
         AuthResponse response = authService.register(registerRequest);
@@ -88,23 +87,23 @@ class AuthServiceTest {
         assertThat(response.getEmail()).isEqualTo("joao@email.com");
         assertThat(response.getRole()).isEqualTo(Role.ADMIN);
 
-        verify(usuarioRepository).existsByEmail("joao@email.com");
+        verify(usuarioService).existsByEmail("joao@email.com");
         verify(passwordEncoder).encode("123456");
-        verify(usuarioRepository).save(any(Usuario.class));
+        verify(usuarioService).save(any(Usuario.class));
         verify(jwtService).generateToken("joao@email.com");
     }
 
     @Test
     @DisplayName("Deve lançar exceção ao registrar com email duplicado")
     void registerWithDuplicateEmail() {
-        when(usuarioRepository.existsByEmail(registerRequest.getEmail())).thenReturn(true);
+        when(usuarioService.existsByEmail(registerRequest.getEmail())).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(registerRequest))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Email já cadastrado");
 
-        verify(usuarioRepository).existsByEmail("joao@email.com");
-        verify(usuarioRepository, never()).save(any());
+        verify(usuarioService).existsByEmail("joao@email.com");
+        verify(usuarioService, never()).save(any());
     }
 
     // ----- LOGIN -----
@@ -127,7 +126,6 @@ class AuthServiceTest {
         verify(authenticationManager).authenticate(
                 new UsernamePasswordAuthenticationToken("joao@email.com", "123456")
         );
-        verify(usuarioRepository, never()).findByEmail(any());
         verify(jwtService).generateToken("joao@email.com");
     }
 }
