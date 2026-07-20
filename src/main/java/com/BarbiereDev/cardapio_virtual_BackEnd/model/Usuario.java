@@ -8,7 +8,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "usuarios")
@@ -17,8 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(of = "id")
-@ToString(exclude = "senha")
+@EqualsAndHashCode(of = "id", callSuper = false)
+@ToString(exclude = {"senha", "estabelecimentosComoColaborador"})
 public class Usuario implements UserDetails {
 
     @Id
@@ -38,6 +40,10 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @ManyToMany(mappedBy = "colaboradores", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Estabelecimento> estabelecimentosComoColaborador = new HashSet<>();
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
@@ -54,7 +60,6 @@ public class Usuario implements UserDetails {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
