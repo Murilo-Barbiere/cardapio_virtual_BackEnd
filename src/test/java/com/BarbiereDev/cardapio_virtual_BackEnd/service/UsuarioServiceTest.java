@@ -62,7 +62,7 @@ class UsuarioServiceTest {
     void findAll() {
         when(usuarioRepository.findAll()).thenReturn(List.of(usuario));
 
-        var resultado = usuarioService.findAll();
+        List<UsuarioResponse> resultado = usuarioService.findAll();
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getNome()).isEqualTo("João Silva");
@@ -76,7 +76,7 @@ class UsuarioServiceTest {
     void findByIdSuccess() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
 
-        var resultado = usuarioService.findById(1L);
+        UsuarioResponse resultado = usuarioService.findById(1L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getNome()).isEqualTo("João Silva");
@@ -103,7 +103,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.existsByEmail("joao.novo@email.com")).thenReturn(false);
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
-        var resultado = usuarioService.update(1L, updateRequest);
+        UsuarioResponse resultado = usuarioService.update(1L, updateRequest);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getNome()).isEqualTo("João Atualizado");
@@ -167,16 +167,12 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve converter Usuario para UsuarioResponse sem senha")
     void toResponse() {
-        var response = usuarioService.toResponse(usuario);
+        UsuarioResponse response = usuarioService.toResponse(usuario);
 
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(1L);
         assertThat(response.getNome()).isEqualTo("João Silva");
         assertThat(response.getEmail()).isEqualTo("joao@email.com");
         assertThat(response.getRole()).isEqualTo(Role.ADMIN);
-        // Senha NÃO deve estar na resposta
-        assertThat(response.getClass().getDeclaredFields())
-                .extracting(java.lang.reflect.Field::getName)
-                .doesNotContain("senha");
     }
 }

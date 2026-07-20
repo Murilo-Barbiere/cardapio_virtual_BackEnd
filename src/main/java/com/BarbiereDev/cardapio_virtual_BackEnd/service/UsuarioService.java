@@ -34,7 +34,7 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponse update(Long id, UsuarioUpdateRequest request) {
-        var usuario = usuarioRepository.findById(id)
+        Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         if (request.getEmail() != null && !request.getEmail().equals(usuario.getEmail())) {

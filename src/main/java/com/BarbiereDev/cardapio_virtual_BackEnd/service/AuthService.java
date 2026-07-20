@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,7 +28,7 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email já cadastrado");
         }
 
-        var usuario = Usuario.builder()
+        Usuario usuario = Usuario.builder()
                 .nome(request.getNome())
                 .email(request.getEmail())
                 .senha(passwordEncoder.encode(request.getSenha()))
@@ -36,7 +37,7 @@ public class AuthService {
 
         usuarioService.save(usuario);
 
-        var token = jwtService.generateToken(usuario.getEmail());
+        String token = jwtService.generateToken(usuario.getEmail());
 
         return AuthResponse.builder()
                 .token(token)
@@ -48,15 +49,15 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        var auth = authenticationManager.authenticate(
+        Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getSenha()
                 )
         );
 
-        var usuario = (Usuario) auth.getPrincipal();
-        var token = jwtService.generateToken(usuario.getEmail());
+        Usuario usuario = (Usuario) auth.getPrincipal();
+        String token = jwtService.generateToken(usuario.getEmail());
 
         return AuthResponse.builder()
                 .token(token)
