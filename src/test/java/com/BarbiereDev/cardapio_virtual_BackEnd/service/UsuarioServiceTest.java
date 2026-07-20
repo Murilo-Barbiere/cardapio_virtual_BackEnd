@@ -72,11 +72,11 @@ class UsuarioServiceTest {
     // ----- FIND BY ID -----
 
     @Test
-    @DisplayName("Deve retornar usuário por ID com sucesso")
+    @DisplayName("Deve retornar usuário por ID com sucesso (proprio usuario)")
     void findByIdSuccess() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
 
-        UsuarioResponse resultado = usuarioService.findById(1L);
+        UsuarioResponse resultado = usuarioService.findById(1L, usuario);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getNome()).isEqualTo("João Silva");
@@ -85,11 +85,36 @@ class UsuarioServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar usuário por ID com sucesso (ADMIN buscando outro)")
+    void findByIdAdminBuscandoOutro() {
+        Usuario admin = Usuario.builder().id(2L).role(Role.ADMIN).build();
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+        UsuarioResponse resultado = usuarioService.findById(1L, admin);
+
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getNome()).isEqualTo("João Silva");
+        verify(usuarioRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao buscar usuário de outro (sem ser ADMIN)")
+    void findByIdOutroUsuarioSemPermissao() {
+        Usuario outro = Usuario.builder().id(2L).role(Role.COLABORADOR).build();
+
+        assertThatThrownBy(() -> usuarioService.findById(1L, outro))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Você não tem permissão");
+
+        verify(usuarioRepository, never()).findById(any());
+    }
+
+    @Test
     @DisplayName("Deve lançar exceção ao buscar usuário inexistente")
     void findByIdNotFound() {
         when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> usuarioService.findById(99L))
+        assertThatThrownBy(() -> usuarioService.findById(99L, usuario))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Usuário não encontrado");
     }
@@ -97,13 +122,13 @@ class UsuarioServiceTest {
     // ----- UPDATE -----
 
     @Test
-    @DisplayName("Deve atualizar usuário com sucesso")
+    @DisplayName("Deve atualizar usuário com sucesso (proprio usuario)")
     void updateSuccess() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.existsByEmail("joao.novo@email.com")).thenReturn(false);
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
-        UsuarioResponse resultado = usuarioService.update(1L, updateRequest);
+        UsuarioResponse resultado = usuarioService.update(1L, updateRequest, usuario);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getNome()).isEqualTo("João Atualizado");
@@ -114,12 +139,42 @@ class UsuarioServiceTest {
     }
 
     @Test
+    @DisplayName("Deve atualizar usuário com sucesso (ADMIN atualizando outro)")
+    void updateAdminAtualizandoOutro() {
+        Usuario admin = Usuario.builder().id(2L).role(Role.ADMIN).build();
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.existsByEmail("joao.novo@email.com")).thenReturn(false);
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
+
+        UsuarioResponse resultado = usuarioService.update(1L, updateRequest, admin);
+
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getNome()).isEqualTo("João Atualizado");
+
+        verify(usuarioRepository).findById(1L);
+        verify(usuarioRepository).existsByEmail("joao.novo@email.com");
+        verify(usuarioRepository).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar 403 ao atualizar usuário de outro (sem ser ADMIN)")
+    void updateOutroUsuarioSemPermissao() {
+        Usuario outro = Usuario.builder().id(2L).role(Role.COLABORADOR).build();
+
+        assertThatThrownBy(() -> usuarioService.update(1L, updateRequest, outro))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Você não tem permissão");
+
+        verify(usuarioRepository, never()).findById(any());
+    }
+
+    @Test
     @DisplayName("Deve lançar exceção ao atualizar com email já existente")
     void updateWithDuplicateEmail() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.existsByEmail("joao.novo@email.com")).thenReturn(true);
 
-        assertThatThrownBy(() -> usuarioService.update(1L, updateRequest))
+        assertThatThrownBy(() -> usuarioService.update(1L, updateRequest, usuario))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Email já cadastrado");
 
@@ -132,7 +187,7 @@ class UsuarioServiceTest {
     void updateNotFound() {
         when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> usuarioService.update(99L, updateRequest))
+        assertThatThrownBy(() -> usuarioService.update(99L, updateRequest, usuario))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Usuário não encontrado");
     }
@@ -140,14 +195,38 @@ class UsuarioServiceTest {
     // ----- DELETE -----
 
     @Test
-    @DisplayName("Deve deletar usuário com sucesso")
+    @DisplayName("Deve deletar usuário com sucesso (proprio usuario)")
     void deleteSuccess() {
         when(usuarioRepository.existsById(1L)).thenReturn(true);
 
-        usuarioService.delete(1L);
+        usuarioService.delete(1L, usuario);
 
         verify(usuarioRepository).existsById(1L);
         verify(usuarioRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve deletar usuário com sucesso (ADMIN deletando outro)")
+    void deleteAdminDeletandoOutro() {
+        Usuario admin = Usuario.builder().id(2L).role(Role.ADMIN).build();
+        when(usuarioRepository.existsById(1L)).thenReturn(true);
+
+        usuarioService.delete(1L, admin);
+
+        verify(usuarioRepository).existsById(1L);
+        verify(usuarioRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve lançar 403 ao deletar usuário de outro (sem ser ADMIN)")
+    void deleteOutroUsuarioSemPermissao() {
+        Usuario outro = Usuario.builder().id(2L).role(Role.COLABORADOR).build();
+
+        assertThatThrownBy(() -> usuarioService.delete(1L, outro))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Você não tem permissão");
+
+        verify(usuarioRepository, never()).existsById(any());
     }
 
     @Test
@@ -155,7 +234,7 @@ class UsuarioServiceTest {
     void deleteNotFound() {
         when(usuarioRepository.existsById(99L)).thenReturn(false);
 
-        assertThatThrownBy(() -> usuarioService.delete(99L))
+        assertThatThrownBy(() -> usuarioService.delete(99L, usuario))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Usuário não encontrado");
 

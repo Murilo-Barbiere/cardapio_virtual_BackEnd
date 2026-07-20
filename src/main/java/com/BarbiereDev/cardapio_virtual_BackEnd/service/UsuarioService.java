@@ -2,6 +2,7 @@ package com.BarbiereDev.cardapio_virtual_BackEnd.service;
 
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.UsuarioUpdateRequest;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.UsuarioResponse;
+import com.BarbiereDev.cardapio_virtual_BackEnd.model.Role;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Usuario;
 import com.BarbiereDev.cardapio_virtual_BackEnd.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +27,17 @@ public class UsuarioService {
                 .toList();
     }
 
-    public UsuarioResponse findById(Long id) {
+    public UsuarioResponse findById(Long id, Usuario usuarioLogado) {
+        verificarPermissao(usuarioLogado, id);
         return usuarioRepository.findById(id)
                 .map(this::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
     }
 
     @Transactional
-    public UsuarioResponse update(Long id, UsuarioUpdateRequest request) {
+    public UsuarioResponse update(Long id, UsuarioUpdateRequest request, Usuario usuarioLogado) {
+        verificarPermissao(usuarioLogado, id);
+
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
@@ -61,7 +65,9 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, Usuario usuarioLogado) {
+        verificarPermissao(usuarioLogado, id);
+
         if (!usuarioRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado");
         }
@@ -90,5 +96,11 @@ public class UsuarioService {
                 .createdAt(usuario.getCreatedAt())
                 .updatedAt(usuario.getUpdatedAt())
                 .build();
+    }
+
+    private void verificarPermissao(Usuario usuarioLogado, Long idBuscado) {
+        if (!usuarioLogado.getId().equals(idBuscado) && usuarioLogado.getRole() != Role.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para acessar este recurso");
+        }
     }
 }
