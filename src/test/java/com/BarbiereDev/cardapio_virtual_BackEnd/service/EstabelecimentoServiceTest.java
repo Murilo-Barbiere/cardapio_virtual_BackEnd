@@ -251,6 +251,44 @@ class EstabelecimentoServiceTest {
         verify(estabelecimentoRepository, never()).save(any());
     }
 
+    // ----- LISTAR COLABORADORES -----
+
+    @Test
+    @DisplayName("Deve listar colaboradores de um estabelecimento")
+    void listarColaboradores() {
+        estabelecimento.getColaboradores().add(outroUsuario);
+        when(estabelecimentoRepository.findById(1L)).thenReturn(Optional.of(estabelecimento));
+
+        Set<EstabelecimentoResponse.UsuarioResumo> resultado = estabelecimentoService.listarColaboradores(1L);
+
+        assertThat(resultado).hasSize(2);
+        assertThat(resultado).extracting(EstabelecimentoResponse.UsuarioResumo::getId)
+                .containsExactlyInAnyOrder(1L, 2L);
+        verify(estabelecimentoRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao listar colaboradores de estabelecimento inexistente")
+    void listarColaboradoresNotFound() {
+        when(estabelecimentoRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> estabelecimentoService.listarColaboradores(99L))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("não encontrado");
+    }
+
+    @Test
+    @DisplayName("Deve retornar lista vazia quando estabelecimento tem apenas o criador")
+    void listarColaboradoresApenasCriador() {
+        when(estabelecimentoRepository.findById(1L)).thenReturn(Optional.of(estabelecimento));
+
+        Set<EstabelecimentoResponse.UsuarioResumo> resultado = estabelecimentoService.listarColaboradores(1L);
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado).extracting(EstabelecimentoResponse.UsuarioResumo::getId)
+                .containsExactly(1L);
+    }
+
     @Test
     @DisplayName("Deve lançar exceção ao remover o criador como colaborador")
     void removerCriadorComoColaborador() {

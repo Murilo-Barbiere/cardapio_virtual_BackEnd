@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/estabelecimentos")
@@ -60,6 +61,11 @@ public class EstabelecimentoController {
     ) {
         estabelecimentoService.delete(id, usuarioLogado);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/colaboradores")
+    public ResponseEntity<Set<EstabelecimentoResponse.UsuarioResumo>> listarColaboradores(@PathVariable Long id) {
+        return ResponseEntity.ok(estabelecimentoService.listarColaboradores(id));
     }
 
     @PostMapping("/{id}/colaboradores/{usuarioId}")

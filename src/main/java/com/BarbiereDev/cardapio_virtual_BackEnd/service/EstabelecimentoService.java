@@ -133,6 +133,15 @@ public class EstabelecimentoService {
         return toResponse(estabelecimento);
     }
 
+    public Set<EstabelecimentoResponse.UsuarioResumo> listarColaboradores(Long id) {
+        Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estabelecimento não encontrado"));
+
+        return estabelecimento.getColaboradores().stream()
+                .map(this::toUsuarioResumo)
+                .collect(Collectors.toSet());
+    }
+
     public EstabelecimentoResponse toResponse(Estabelecimento estabelecimento) {
         return EstabelecimentoResponse.builder()
                 .id(estabelecimento.getId())
