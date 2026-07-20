@@ -240,6 +240,18 @@ class EstabelecimentoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção ao remover colaborador quando não for o criador")
+    void removerColaboradorByNonCriador() {
+        when(estabelecimentoRepository.findById(1L)).thenReturn(Optional.of(estabelecimento));
+
+        assertThatThrownBy(() -> estabelecimentoService.removerColaborador(1L, 2L, outroUsuario))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Apenas o criador");
+
+        verify(estabelecimentoRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("Deve lançar exceção ao remover o criador como colaborador")
     void removerCriadorComoColaborador() {
         when(estabelecimentoRepository.findById(1L)).thenReturn(Optional.of(estabelecimento));
