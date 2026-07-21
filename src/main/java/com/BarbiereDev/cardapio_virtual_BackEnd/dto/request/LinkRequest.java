@@ -10,12 +10,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EstabelecimentoRequest {
+public class LinkRequest {
 
-    @NotBlank(message = "Nome é obrigatório")
-    private String nome;
+    @NotBlank(message = "URL é obrigatória")
+    private String url;
 
-    private String slug;
-
-    private String telefone;
+    private String descricao;
 }

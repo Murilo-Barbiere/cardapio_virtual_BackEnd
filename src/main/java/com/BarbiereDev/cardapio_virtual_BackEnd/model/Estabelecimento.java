@@ -17,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"criador", "colaboradores", "enderecos"})
+@ToString(exclude = {"criador", "colaboradores", "enderecos", "links"})
 public class Estabelecimento {
 
     @Id
@@ -46,6 +46,13 @@ public class Estabelecimento {
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Endereco> enderecos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Link> links = new ArrayList<>();
+
+    @Column
+    private String telefone;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

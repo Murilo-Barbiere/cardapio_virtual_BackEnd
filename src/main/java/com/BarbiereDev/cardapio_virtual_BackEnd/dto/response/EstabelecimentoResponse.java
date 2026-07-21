@@ -18,9 +18,11 @@ public class EstabelecimentoResponse {
     private Long id;
     private String nome;
     private String slug;
+    private String telefone;
     private UsuarioResumo criador;
     private Set<UsuarioResumo> colaboradores;
     private List<EnderecoResponse> enderecos;
+    private List<LinkResponse> links;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

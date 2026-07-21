@@ -3,8 +3,10 @@ package com.BarbiereDev.cardapio_virtual_BackEnd.service;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.EstabelecimentoRequest;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.EnderecoResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.EstabelecimentoResponse;
+import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.LinkResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Endereco;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Estabelecimento;
+import com.BarbiereDev.cardapio_virtual_BackEnd.model.Link;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Usuario;
 import com.BarbiereDev.cardapio_virtual_BackEnd.repository.EstabelecimentoRepository;
 import com.BarbiereDev.cardapio_virtual_BackEnd.repository.UsuarioRepository;
@@ -56,6 +58,7 @@ public class EstabelecimentoService {
         Estabelecimento estabelecimento = Estabelecimento.builder()
                 .nome(request.getNome())
                 .slug(slug)
+                .telefone(request.getTelefone())
                 .criador(criador)
                 .colaboradores(new HashSet<>(Set.of(criador)))
                 .build();
@@ -83,6 +86,8 @@ public class EstabelecimentoService {
             }
             estabelecimento.setSlug(request.getSlug());
         }
+
+        estabelecimento.setTelefone(request.getTelefone());
 
         estabelecimentoRepository.save(estabelecimento);
         return toResponse(estabelecimento);
@@ -149,12 +154,16 @@ public class EstabelecimentoService {
                 .id(estabelecimento.getId())
                 .nome(estabelecimento.getNome())
                 .slug(estabelecimento.getSlug())
+                .telefone(estabelecimento.getTelefone())
                 .criador(toUsuarioResumo(estabelecimento.getCriador()))
                 .colaboradores(estabelecimento.getColaboradores().stream()
                         .map(this::toUsuarioResumo)
                         .collect(Collectors.toSet()))
                 .enderecos(estabelecimento.getEnderecos().stream()
                         .map(this::toEnderecoResponse)
+                        .toList())
+                .links(estabelecimento.getLinks().stream()
+                        .map(this::toLinkResponse)
                         .toList())
                 .createdAt(estabelecimento.getCreatedAt())
                 .updatedAt(estabelecimento.getUpdatedAt())
@@ -171,6 +180,16 @@ public class EstabelecimentoService {
                 .numero(endereco.getNumero())
                 .createdAt(endereco.getCreatedAt())
                 .updatedAt(endereco.getUpdatedAt())
+                .build();
+    }
+
+    private LinkResponse toLinkResponse(Link link) {
+        return LinkResponse.builder()
+                .id(link.getId())
+                .url(link.getUrl())
+                .descricao(link.getDescricao())
+                .createdAt(link.getCreatedAt())
+                .updatedAt(link.getUpdatedAt())
                 .build();
     }
 
