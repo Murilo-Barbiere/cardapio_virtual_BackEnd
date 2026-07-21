@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -15,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"criador", "colaboradores"})
+@ToString(exclude = {"criador", "colaboradores", "enderecos"})
 public class Estabelecimento {
 
     @Id
@@ -40,6 +42,10 @@ public class Estabelecimento {
     )
     @Builder.Default
     private Set<Usuario> colaboradores = new HashSet<>();
+
+    @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Endereco> enderecos = new ArrayList<>();
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

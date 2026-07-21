@@ -1,7 +1,9 @@
 package com.BarbiereDev.cardapio_virtual_BackEnd.service;
 
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.EstabelecimentoRequest;
+import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.EnderecoResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.EstabelecimentoResponse;
+import com.BarbiereDev.cardapio_virtual_BackEnd.model.Endereco;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Estabelecimento;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Usuario;
 import com.BarbiereDev.cardapio_virtual_BackEnd.repository.EstabelecimentoRepository;
@@ -151,8 +153,24 @@ public class EstabelecimentoService {
                 .colaboradores(estabelecimento.getColaboradores().stream()
                         .map(this::toUsuarioResumo)
                         .collect(Collectors.toSet()))
+                .enderecos(estabelecimento.getEnderecos().stream()
+                        .map(this::toEnderecoResponse)
+                        .toList())
                 .createdAt(estabelecimento.getCreatedAt())
                 .updatedAt(estabelecimento.getUpdatedAt())
+                .build();
+    }
+
+    private EnderecoResponse toEnderecoResponse(Endereco endereco) {
+        return EnderecoResponse.builder()
+                .id(endereco.getId())
+                .cidade(endereco.getCidade())
+                .estado(endereco.getEstado())
+                .bairro(endereco.getBairro())
+                .rua(endereco.getRua())
+                .numero(endereco.getNumero())
+                .createdAt(endereco.getCreatedAt())
+                .updatedAt(endereco.getUpdatedAt())
                 .build();
     }
 

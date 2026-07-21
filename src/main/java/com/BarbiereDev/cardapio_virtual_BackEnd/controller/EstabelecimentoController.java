@@ -1,8 +1,11 @@
 package com.BarbiereDev.cardapio_virtual_BackEnd.controller;
 
+import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.EnderecoRequest;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.EstabelecimentoRequest;
+import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.EnderecoResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.EstabelecimentoResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Usuario;
+import com.BarbiereDev.cardapio_virtual_BackEnd.service.EnderecoService;
 import com.BarbiereDev.cardapio_virtual_BackEnd.service.EstabelecimentoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import java.util.Set;
 public class EstabelecimentoController {
 
     private final EstabelecimentoService estabelecimentoService;
+    private final EnderecoService enderecoService;
 
     @GetMapping
     public ResponseEntity<List<EstabelecimentoResponse>> findAll() {
@@ -84,5 +88,35 @@ public class EstabelecimentoController {
             @AuthenticationPrincipal Usuario usuarioLogado
     ) {
         return ResponseEntity.ok(estabelecimentoService.removerColaborador(id, usuarioId, usuarioLogado));
+    }
+
+    @PostMapping("/{id}/enderecos")
+    public ResponseEntity<EnderecoResponse> criarEndereco(
+            @PathVariable Long id,
+            @Valid @RequestBody EnderecoRequest request,
+            @AuthenticationPrincipal Usuario usuarioLogado
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(enderecoService.create(id, request, usuarioLogado));
+    }
+
+    @PutMapping("/{id}/enderecos/{enderecoId}")
+    public ResponseEntity<EnderecoResponse> atualizarEndereco(
+            @PathVariable Long id,
+            @PathVariable Long enderecoId,
+            @Valid @RequestBody EnderecoRequest request,
+            @AuthenticationPrincipal Usuario usuarioLogado
+    ) {
+        return ResponseEntity.ok(enderecoService.update(id, enderecoId, request, usuarioLogado));
+    }
+
+    @DeleteMapping("/{id}/enderecos/{enderecoId}")
+    public ResponseEntity<Void> deletarEndereco(
+            @PathVariable Long id,
+            @PathVariable Long enderecoId,
+            @AuthenticationPrincipal Usuario usuarioLogado
+    ) {
+        enderecoService.delete(id, enderecoId, usuarioLogado);
+        return ResponseEntity.noContent().build();
     }
 }

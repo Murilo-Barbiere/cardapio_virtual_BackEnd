@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,6 +20,7 @@ public class EstabelecimentoResponse {
     private String slug;
     private UsuarioResumo criador;
     private Set<UsuarioResumo> colaboradores;
+    private List<EnderecoResponse> enderecos;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
