@@ -17,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"criador", "colaboradores", "enderecos", "links"})
+@ToString(exclude = {"criador", "colaboradores", "enderecos", "links", "cardapios"})
 public class Estabelecimento {
 
     @Id
@@ -50,6 +50,10 @@ public class Estabelecimento {
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Link> links = new ArrayList<>();
+
+    @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Cardapio> cardapios = new ArrayList<>();
 
     @Column
     private String telefone;

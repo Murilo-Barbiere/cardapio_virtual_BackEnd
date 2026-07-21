@@ -1,9 +1,11 @@
 package com.BarbiereDev.cardapio_virtual_BackEnd.service;
 
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.request.EstabelecimentoRequest;
+import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.CardapioResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.EnderecoResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.EstabelecimentoResponse;
 import com.BarbiereDev.cardapio_virtual_BackEnd.dto.response.LinkResponse;
+import com.BarbiereDev.cardapio_virtual_BackEnd.model.Cardapio;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Endereco;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Estabelecimento;
 import com.BarbiereDev.cardapio_virtual_BackEnd.model.Link;
@@ -165,6 +167,9 @@ public class EstabelecimentoService {
                 .links(estabelecimento.getLinks().stream()
                         .map(this::toLinkResponse)
                         .toList())
+                .cardapios(estabelecimento.getCardapios().stream()
+                        .map(this::toCardapioResponse)
+                        .toList())
                 .createdAt(estabelecimento.getCreatedAt())
                 .updatedAt(estabelecimento.getUpdatedAt())
                 .build();
@@ -180,6 +185,16 @@ public class EstabelecimentoService {
                 .numero(endereco.getNumero())
                 .createdAt(endereco.getCreatedAt())
                 .updatedAt(endereco.getUpdatedAt())
+                .build();
+    }
+
+    private CardapioResponse toCardapioResponse(Cardapio cardapio) {
+        return CardapioResponse.builder()
+                .id(cardapio.getId())
+                .nome(cardapio.getNome())
+                .descricao(cardapio.getDescricao())
+                .createdAt(cardapio.getCreatedAt())
+                .updatedAt(cardapio.getUpdatedAt())
                 .build();
     }
 

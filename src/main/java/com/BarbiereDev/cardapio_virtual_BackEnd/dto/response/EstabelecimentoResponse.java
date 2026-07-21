@@ -23,6 +23,7 @@ public class EstabelecimentoResponse {
     private Set<UsuarioResumo> colaboradores;
     private List<EnderecoResponse> enderecos;
     private List<LinkResponse> links;
+    private List<CardapioResponse> cardapios;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
