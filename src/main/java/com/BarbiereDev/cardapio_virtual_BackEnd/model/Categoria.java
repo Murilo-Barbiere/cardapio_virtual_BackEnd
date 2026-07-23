@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "cardapios")
+@Table(name = "categorias")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"estabelecimento", "categorias"})
-public class Cardapio {
+@ToString(exclude = {"cardapio", "itens"})
+public class Categoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,13 +28,16 @@ public class Cardapio {
     @Column
     private String descricao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estabelecimento_id", nullable = false)
-    private Estabelecimento estabelecimento;
+    @Column(name = "ordem_exibicao")
+    private Integer ordemExibicao;
 
-    @OneToMany(mappedBy = "cardapio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cardapio_id", nullable = false)
+    private Cardapio cardapio;
+
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private List<Categoria> categorias = new ArrayList<>();
+    private List<ItemCardapio> itens = new ArrayList<>();
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
