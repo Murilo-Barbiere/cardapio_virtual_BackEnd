@@ -1,6 +1,7 @@
 package com.BarbiereDev.cardapio_virtual_BackEnd.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +18,9 @@ public class EstabelecimentoRequest {
 
     private String slug;
 
+    @Pattern(
+            regexp = "^\\+[1-9]\\d{7,14}$",
+            message = "Telefone inválido"
+    )
     private String telefone;
 }

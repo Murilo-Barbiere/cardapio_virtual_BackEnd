@@ -1,6 +1,7 @@
 package com.BarbiereDev.cardapio_virtual_BackEnd.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,5 +26,6 @@ public class EnderecoRequest {
     private String rua;
 
     @NotBlank(message = "Número é obrigatório")
+    @Pattern(regexp = "^[0-9]+$", message = "O campo deve conter apenas caracteres numéricos")
     private String numero;
 }
